@@ -1,0 +1,346 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title><%= title %></title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+        
+        .container {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            max-width: 500px;
+            width: 100%;
+            padding: 40px;
+            text-align: center;
+        }
+        
+        h1 {
+            color: #333;
+            margin-bottom: 20px;
+            font-size: 28px;
+        }
+        
+        .phone-number {
+            background: #f0f3ff;
+            color: #667eea;
+            padding: 10px 20px;
+            border-radius: 50px;
+            display: inline-block;
+            font-weight: 600;
+            margin-bottom: 30px;
+            font-size: 18px;
+        }
+        
+        .status-card {
+            background: #f8f9fa;
+            border-radius: 15px;
+            padding: 30px;
+            margin-bottom: 20px;
+        }
+        
+        .loader {
+            border: 5px solid #f3f3f3;
+            border-top: 5px solid #667eea;
+            border-radius: 50%;
+            width: 60px;
+            height: 60px;
+            animation: spin 1s linear infinite;
+            margin: 20px auto;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .status-text {
+            color: #666;
+            font-size: 16px;
+            margin: 20px 0;
+            line-height: 1.6;
+        }
+        
+        .pairing-container {
+            display: none;
+        }
+        
+        .pairing-code {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 30px;
+            border-radius: 15px;
+            margin: 20px 0;
+        }
+        
+        .pairing-code .label {
+            color: rgba(255,255,255,0.8);
+            font-size: 14px;
+            margin-bottom: 10px;
+        }
+        
+        .pairing-code .code {
+            font-size: 42px;
+            font-weight: bold;
+            letter-spacing: 10px;
+            color: white;
+            font-family: monospace;
+        }
+        
+        .instructions {
+            background: #f0f3ff;
+            border-radius: 10px;
+            padding: 20px;
+            margin: 20px 0;
+            text-align: left;
+        }
+        
+        .instructions h3 {
+            color: #495057;
+            margin-bottom: 15px;
+            font-size: 16px;
+        }
+        
+        .instructions ol {
+            padding-left: 20px;
+            color: #6c757d;
+            line-height: 1.8;
+        }
+        
+        .instructions li {
+            margin-bottom: 8px;
+        }
+        
+        .error-container {
+            display: none;
+            background: #f8d7da;
+            color: #721c24;
+            padding: 20px;
+            border-radius: 10px;
+            margin: 20px 0;
+        }
+        
+        .error-message {
+            font-size: 16px;
+        }
+        
+        .btn {
+            display: inline-block;
+            padding: 12px 30px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            text-decoration: none;
+            border-radius: 50px;
+            font-weight: 600;
+            margin-top: 20px;
+            transition: transform 0.2s, box-shadow 0.2s;
+            border: none;
+            cursor: pointer;
+        }
+        
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(102, 126, 234, 0.4);
+        }
+        
+        .btn.secondary {
+            background: #6c757d;
+        }
+        
+        .footer {
+            text-align: center;
+            margin-top: 30px;
+            color: #999;
+            font-size: 12px;
+        }
+        
+        .copy-btn {
+            background: white;
+            color: #667eea;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 8px;
+            margin-top: 15px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.2s;
+        }
+        
+        .copy-btn:hover {
+            background: #f0f3ff;
+        }
+        
+        .time-info {
+            color: #999;
+            font-size: 12px;
+            margin-top: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1><%= title %></h1>
+        
+        <div class="phone-number">
+            📱 <%= phoneNumber %>
+        </div>
+        
+        <!-- Loading State -->
+        <div id="loadingState" class="status-card">
+            <div class="loader"></div>
+            <div class="status-text">
+                <strong>Memproses permintaan...</strong><br>
+                Sistem sedang meminta kode pairing ke server.<br>
+                Mohon tunggu beberapa saat.
+            </div>
+        </div>
+        
+        <!-- Pairing Code State -->
+        <div id="pairingState" class="pairing-container">
+            <div class="pairing-code">
+                <div class="label">KODE PAIRING KAMU</div>
+                <div class="code" id="pairingCode"></div>
+            </div>
+            
+            <div class="instructions">
+                <h3>📱 Cara menggunakan:</h3>
+                <ol>
+                    <li>Buka aplikasi WhatsApp di HP kamu</li>
+                    <li>Tap titik tiga (atau settings) > Perangkat Tertaut</li>
+                    <li>Tap "Hubungkan dengan nomor telepon"</li>
+                    <li>Masukkan kode pairing di atas</li>
+                    <li>Tunggu hingga bot terhubung</li>
+                </ol>
+            </div>
+            
+            <button class="copy-btn" onclick="copyPairingCode()">
+                📋 Salin Kode
+            </button>
+            
+            <div class="time-info" id="timeInfo"></div>
+        </div>
+        
+        <!-- Error State -->
+        <div id="errorState" class="error-container">
+            <div class="error-message" id="errorMessage"></div>
+            <a href="/" class="btn secondary" style="margin-top: 15px;">← Kembali ke Beranda</a>
+        </div>
+        
+        <a href="/" class="btn secondary" style="margin-top: 20px;">← Request Nomor Lain</a>
+        
+        <div class="footer">
+            © 2024 Pairing Bot WhatsApp. All rights reserved.
+        </div>
+    </div>
+
+    <script>
+        const requestId = '<%= requestId %>';
+        const loadingState = document.getElementById('loadingState');
+        const pairingState = document.getElementById('pairingState');
+        const errorState = document.getElementById('errorState');
+        const pairingCodeEl = document.getElementById('pairingCode');
+        const errorMessageEl = document.getElementById('errorMessage');
+        const timeInfoEl = document.getElementById('timeInfo');
+        
+        let pollingCount = 0;
+        const maxPolling = 60; // Maksimal 60 kali (3 menit)
+        
+        function formatTime(date) {
+            return new Date(date).toLocaleTimeString('id-ID', {
+                hour: '2-digit',
+                minute: '2-digit',
+                second: '2-digit'
+            });
+        }
+        
+        function copyPairingCode() {
+            const code = pairingCodeEl.textContent;
+            navigator.clipboard.writeText(code).then(() => {
+                alert('Kode berhasil disalin!');
+            }).catch(() => {
+                alert('Gagal menyalin kode. Silakan salin manual.');
+            });
+        }
+        
+        function checkStatus() {
+            pollingCount++;
+            
+            fetch(`/api/check-status/${requestId}`)
+                .then(res => res.json())
+                .then(data => {
+                    console.log('Status:', data);
+                    
+                    if (data.success) {
+                        if (data.status === 'done' && data.pairingCode) {
+                            // Tampilkan kode pairing
+                            loadingState.style.display = 'none';
+                            pairingState.style.display = 'block';
+                            errorState.style.display = 'none';
+                            
+                            pairingCodeEl.textContent = data.pairingCode;
+                            
+                            if (data.updatedAt) {
+                                timeInfoEl.textContent = `Diperbarui: ${formatTime(data.updatedAt)}`;
+                            }
+                            
+                            // Hentikan polling
+                            clearInterval(pollingInterval);
+                            
+                        } else if (data.status === 'failed') {
+                            // Tampilkan error
+                            loadingState.style.display = 'none';
+                            pairingState.style.display = 'none';
+                            errorState.style.display = 'block';
+                            errorMessageEl.textContent = 'Gagal mendapatkan kode pairing. Silakan coba lagi nanti.';
+                            clearInterval(pollingInterval);
+                            
+                        } else if (pollingCount >= maxPolling) {
+                            // Timeout
+                            loadingState.style.display = 'none';
+                            errorState.style.display = 'block';
+                            errorMessageEl.textContent = 'Waktu permintaan habis. Silakan coba lagi.';
+                            clearInterval(pollingInterval);
+                        }
+                        // Kalau masih pending, lanjut polling
+                    } else {
+                        console.error('Error from server:', data.error);
+                    }
+                })
+                .catch(err => {
+                    console.error('Error:', err);
+                    if (pollingCount >= maxPolling) {
+                        errorState.style.display = 'block';
+                        errorMessageEl.textContent = 'Terjadi kesalahan koneksi. Silakan refresh halaman.';
+                        clearInterval(pollingInterval);
+                    }
+                });
+        }
+        
+        // Polling setiap 3 detik
+        const pollingInterval = setInterval(checkStatus, 3000);
+        
+        // Cek langsung saat halaman dimuat
+        checkStatus();
+        
+        // Bersihkan interval saat pindah halaman
+        window.addEventListener('beforeunload', function() {
+            clearInterval(pollingInterval);
+        });
+    </script>
+</body>
+</html>
